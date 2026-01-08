@@ -5152,11 +5152,11 @@ static struct platform_driver hdmirx_driver = {
 	}
 };
 
-static int __init hdmirx_init(void)
+static int __init hdmi_rx_init(void)
 {
 	return platform_driver_register(&hdmirx_driver);
 }
-module_init(hdmirx_init);
+module_init(hdmi_rx_init);
 
 static void __exit hdmirx_exit(void)
 {
