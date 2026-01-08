@@ -1821,7 +1821,7 @@ static int hdmirx_g_parm(struct file *file, void *priv,
 	struct rk_hdmirx_dev *hdmirx_dev = stream->hdmirx_dev;
 	struct v4l2_fract fps;
 
-	if (parm->type != V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE)
+	if (parm->type != V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE && parm->type != V4L2_BUF_TYPE_VIDEO_CAPTURE)
 		return -EINVAL;
 
 	fps = v4l2_calc_timeperframe(&hdmirx_dev->timings);
@@ -1903,6 +1903,7 @@ static void hdmirx_set_fmt(struct hdmirx_stream *stream,
 	unsigned int imagesize = 0, planes;
 	u32 xsubs = 1, ysubs = 1, i;
 
+	memset(pixm->reserved, 0, sizeof(pixm->reserved));
 	memset(&pixm->plane_fmt[0], 0, sizeof(struct v4l2_plane_pix_format));
 	fmt = find_output_fmt(stream, pixm->pixelformat);
 	if (!fmt) {
@@ -2090,7 +2091,7 @@ static int hdmirx_g_fmt_vid_cap_mplane(struct file *file, void *fh,
 	struct v4l2_pix_format_mplane pixm;
 
 	pixm.pixelformat = hdmirx_dev->cur_fmt_fourcc;
-	hdmirx_set_fmt(stream, &pixm, false);
+	hdmirx_set_fmt(stream, &pixm, true);
 	f->fmt.pix_mp = stream->pixm;
 
 	return 0;
@@ -2104,7 +2105,7 @@ static int hdmirx_querycap(struct file *file, void *priv,
 
 	strscpy(cap->driver, dev->driver->name, sizeof(cap->driver));
 	strscpy(cap->card, dev->driver->name, sizeof(cap->card));
-	snprintf(cap->bus_info, sizeof(cap->bus_info), "%s", dev_name(dev));
+	snprintf(cap->bus_info, sizeof(cap->bus_info), "platform:%s", dev_name(dev));
 
 	return 0;
 }
