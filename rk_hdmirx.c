@@ -5092,7 +5092,6 @@ err_work_queues:
 	cancel_delayed_work(&hdmirx_dev->delayed_work_hotplug);
 	cancel_delayed_work(&hdmirx_dev->delayed_work_res_change);
 	cancel_delayed_work(&hdmirx_dev->delayed_work_audio);
-	clk_bulk_disable_unprepare(hdmirx_dev->num_clks, hdmirx_dev->clks);
 	if (hdmirx_dev->power_on)
 		pm_runtime_put_sync(dev);
 	pm_runtime_disable(dev);
@@ -5111,7 +5110,6 @@ static int hdmirx_remove(struct platform_device *pdev)
 	cancel_delayed_work(&hdmirx_dev->delayed_work_res_change);
 	cancel_delayed_work(&hdmirx_dev->delayed_work_audio);
 	cancel_delayed_work(&hdmirx_dev->delayed_work_cec);
-	clk_bulk_disable_unprepare(hdmirx_dev->num_clks, hdmirx_dev->clks);
 	reset_control_assert(hdmirx_dev->rst_a);
 	reset_control_assert(hdmirx_dev->rst_p);
 	reset_control_assert(hdmirx_dev->rst_ref);
