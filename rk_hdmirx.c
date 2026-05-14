@@ -2073,9 +2073,9 @@ static int hdmirx_s_fmt_vid_cap_mplane(struct file *file,
 	}
 
 	if (pix->pixelformat != hdmirx_dev->cur_fmt_fourcc) {
-		v4l2_err(v4l2_dev, "%s: err, set_fmt:%#x, cur_fmt:%#x (but Ok) !\n",
+		v4l2_err(v4l2_dev, "%s: err, set_fmt:%#x, cur_fmt:%#x\n",
 			__func__, pix->pixelformat, hdmirx_dev->cur_fmt_fourcc);
-		// return -EINVAL;
+		return -EINVAL;
 	}
 
 	hdmirx_set_fmt(stream, &f->fmt.pix_mp, false);
