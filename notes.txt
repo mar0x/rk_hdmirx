@@ -1,0 +1,31 @@
+- https://github.com/radxa-repo/bsp.git
+  tool to fetch, patch and build "vendor kernel"
+
+	hdmiin_dc: hdmiin-dc {
+		compatible = "rockchip,dummy-codec";
+		#sound-dai-cells = <0>;
+	};
+
+	hdmiin-sound {
+		compatible = "simple-audio-card";
+		simple-audio-card,format = "i2s";
+		simple-audio-card,name = "rockchip,hdmiin";
+		simple-audio-card,bitclock-master = <&dailink0_master>;
+		simple-audio-card,frame-master = <&dailink0_master>;
+		status = "okay";
+		simple-audio-card,cpu {
+			sound-dai = <&i2s7_8ch>;
+		};
+		dailink0_master: simple-audio-card,codec {
+			sound-dai = <&hdmiin_dc>;
+		};
+	};
+
+- https://github.com/radxa/kernel.git
+  repo fetched by bsp tool
+
+- https://github.com/armbian/linux-rockchip.git
+  armbian version of "vendor kernel"
+
+- https://github.com/rockchip-linux/kernel.git
+  SoC vendor kernel
