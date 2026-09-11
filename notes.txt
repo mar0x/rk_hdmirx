@@ -29,3 +29,6 @@
 
 - https://github.com/rockchip-linux/kernel.git
   SoC vendor kernel
+
+- add the line "extraargs=initcall_blacklist=hdmirx_init" into /boot/armbianEnv.txt
+  to block built-in module initialisation, then rebuild and insmod fixed version
