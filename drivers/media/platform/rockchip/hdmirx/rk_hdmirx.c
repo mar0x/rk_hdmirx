@@ -3641,6 +3641,8 @@ static int hdmirx_audio_hw_params(struct device *dev, void *data,
 				  struct hdmi_codec_params *params)
 {
 	dev_dbg(dev, "%s\n", __func__);
+
+	// hdmirx_audio_fifo_init(data);
 	return 0;
 }
 
@@ -3700,14 +3702,14 @@ static int hdmirx_register_audio_device(struct rk_hdmirx_dev *hdmirx_dev)
 	struct hdmirx_audiostate *as = &hdmirx_dev->audio_state;
 	struct hdmi_codec_pdata codec_data = {
 		.ops = &hdmirx_audio_codec_ops,
-		.spdif = 1,
+		.spdif = 0,
 		.i2s = 1,
 		.max_i2s_channels = 8,
 		.data = hdmirx_dev,
 	};
 
 	as->pdev = platform_device_register_data(hdmirx_dev->dev,
-						 HDMI_CODEC_DRV_NAME,
+						 "hdmirx-audio-codec", // HDMI_CODEC_DRV_NAME,
 						 PLATFORM_DEVID_AUTO,
 						 &codec_data,
 						 sizeof(codec_data));

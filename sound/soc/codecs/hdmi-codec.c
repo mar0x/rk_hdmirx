@@ -459,9 +459,11 @@ static int hdmi_codec_startup(struct snd_pcm_substream *substream,
 {
 	struct hdmi_codec_priv *hcp = snd_soc_dai_get_drvdata(dai);
 	bool tx = substream->stream == SNDRV_PCM_STREAM_PLAYBACK;
+	bool has_capture = true;
+	bool has_playback = false;
 	int ret = 0;
 
-	if (hcp->tx_dlp && substream->stream != SNDRV_PCM_STREAM_PLAYBACK)
+	if (!((has_playback && tx) || (has_capture && !tx)))
 		return 0;
 
 	mutex_lock(&hcp->lock);
@@ -503,8 +505,11 @@ static void hdmi_codec_shutdown(struct snd_pcm_substream *substream,
 				struct snd_soc_dai *dai)
 {
 	struct hdmi_codec_priv *hcp = snd_soc_dai_get_drvdata(dai);
+	bool tx = substream->stream == SNDRV_PCM_STREAM_PLAYBACK;
+	bool has_capture = true;
+	bool has_playback = false;
 
-	if (hcp->tx_dlp && substream->stream != SNDRV_PCM_STREAM_PLAYBACK)
+	if (!((has_playback && tx) || (has_capture && !tx)))
 		return;
 
 	hcp->chmap_idx = HDMI_CODEC_CHMAP_IDX_UNKNOWN;
@@ -568,8 +573,8 @@ static int hdmi_codec_hw_params(struct snd_pcm_substream *substream,
 	};
 	int ret;
 
-	if (hcp->tx_dlp && substream->stream != SNDRV_PCM_STREAM_PLAYBACK)
-		return 0;
+	//if (hcp->tx_dlp && substream->stream != SNDRV_PCM_STREAM_PLAYBACK)
+	//	return 0;
 
 	if (!hcp->hcd.ops->hw_params)
 		return 0;
@@ -612,8 +617,8 @@ static int hdmi_codec_prepare(struct snd_pcm_substream *substream,
 	struct hdmi_codec_params hp;
 	int ret;
 
-	if (hcp->tx_dlp && substream->stream != SNDRV_PCM_STREAM_PLAYBACK)
-		return 0;
+	//if (hcp->tx_dlp && substream->stream != SNDRV_PCM_STREAM_PLAYBACK)
+	//	return 0;
 
 	if (!hcp->hcd.ops->prepare)
 		return 0;
@@ -863,12 +868,19 @@ static int hdmi_dai_probe(struct snd_soc_dai *dai)
 			.source = "RX",
 		},
 	};
-	int ret;
+	int ret, i;
 
 	dapm = snd_soc_component_get_dapm(dai->component);
-	ret = snd_soc_dapm_add_routes(dapm, route, 2);
-	if (ret)
-		return ret;
+
+	/* One of the directions might be omitted for unidirectional DAIs */
+	for (i = 0; i < ARRAY_SIZE(route); i++) {
+		if (!route[i].source || !route[i].sink)
+			continue;
+
+		ret = snd_soc_dapm_add_routes(dapm, &route[i], 1);
+		if (ret)
+			return ret;
+	}
 
 	daifmt = devm_kzalloc(dai->dev, sizeof(*daifmt), GFP_KERNEL);
 	if (!daifmt)
@@ -1109,22 +1121,17 @@ static int hdmi_codec_probe(struct platform_device *pdev)
 
 	if (hcd->i2s) {
 		daidrv[i] = hdmi_i2s_dai;
-		daidrv[i].playback.channels_max = hcd->max_i2s_channels;
-		/* Disable capture for HDMI-TX (output only) to prevent
-		 * PulseAudio from trying to open capture streams which
-		 * causes "Only one simultaneous stream supported!" errors
-		 * and results in mono audio output.
-		 */
-		daidrv[i].capture.channels_min = 0;
-		daidrv[i].capture.channels_max = 0;
+		// daidrv[i].capture.channels_max = hcd->max_i2s_channels;
+
+		memset(&daidrv[i].playback, 0, sizeof(daidrv[i].playback));
+
 		i++;
 	}
 
 	if (hcd->spdif) {
 		daidrv[i] = hdmi_spdif_dai;
-		/* Disable capture for HDMI-TX SPDIF (output only) */
-		daidrv[i].capture.channels_min = 0;
-		daidrv[i].capture.channels_max = 0;
+
+		memset(&daidrv[i].playback, 0, sizeof(daidrv[i].playback));
 	}
 
 	dev_set_drvdata(dev, hcp);
@@ -1139,16 +1146,16 @@ static int hdmi_codec_probe(struct platform_device *pdev)
 	return 0;
 }
 
-static struct platform_driver hdmi_codec_driver = {
+static struct platform_driver hdmirx_codec_driver = {
 	.driver = {
-		.name = HDMI_CODEC_DRV_NAME,
+		.name = "hdmirx-audio-codec", // HDMI_CODEC_DRV_NAME,
 	},
 	.probe = hdmi_codec_probe,
 };
 
-module_platform_driver(hdmi_codec_driver);
+module_platform_driver(hdmirx_codec_driver);
 
 MODULE_AUTHOR("Jyri Sarha <jsarha@ti.com>");
-MODULE_DESCRIPTION("HDMI Audio Codec Driver");
+MODULE_DESCRIPTION("HDMIRX Audio Codec Driver");
 MODULE_LICENSE("GPL");
-MODULE_ALIAS("platform:" HDMI_CODEC_DRV_NAME);
+MODULE_ALIAS("platform:" "hdmirx-audio-codec"); // HDMI_CODEC_DRV_NAME);
