@@ -18,7 +18,7 @@
 #include <sound/soc.h>
 #include <sound/soc-dapm.h>
 
-#define DRV_NAME "rk-hdmi-sound"
+#define DRV_NAME "rk-hdmiin-sound"
 #define MAX_CODECS	2
 #define DEFAULT_MCLK_FS	256
 
@@ -270,10 +270,10 @@ static int rk_hdmi_probe(struct platform_device *pdev)
 
 	rk_data->dai.cpus->of_node = cpu_np;
 	rk_data->dai.platforms->of_node = cpu_np;
-	of_node_put(cpu_np);
+	// of_node_put(cpu_np);
 
 	rk_data->hdmi_jack_pin.pin = rk_data->card.name;
-	rk_data->hdmi_jack_pin.mask = SND_JACK_LINEOUT;
+	rk_data->hdmi_jack_pin.mask = SND_JACK_LINEIN | SND_JACK_MICROPHONE;
 	rk_data->card.num_links = 1;
 	rk_data->card.owner = THIS_MODULE;
 	rk_data->card.dai_link = &rk_data->dai;
@@ -292,7 +292,7 @@ static int rk_hdmi_probe(struct platform_device *pdev)
 }
 
 static const struct of_device_id rockchip_sound_of_match[] = {
-	{ .compatible = "rockchip,hdmi", },
+	{ .compatible = "rockchip,hdmiin", },
 	{},
 };
 
