@@ -32,3 +32,9 @@
 
 - add the line "extraargs=initcall_blacklist=hdmirx_init" into /boot/armbianEnv.txt
   to block built-in module initialisation, then rebuild and insmod fixed version
+
+- fix 3.5mm jack microphone detection
+  - make -C /lib/modules/`uname -r`/build M=$PWD modules
+  - sudo armbian-add-overlay rk3588-es8316-sound.dts
+  - reboot
+  - sudo insmod rk_multicodecs_fixed.ko

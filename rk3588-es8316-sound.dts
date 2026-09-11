@@ -1,0 +1,8 @@
+/dts-v1/;
+/plugin/;
+
+&{/es8316-sound} {
+		status = "okay";
+		compatible = "rockchip,multicodecs-card-fixed";
+		rockchip,card-name = "rockchip-es8316-fixed";
+};

@@ -9,3 +9,6 @@ rk_hdmi_rx_codec-objs := sound/soc/codecs/hdmi-codec.o
 
 obj-m += rk_hdmi_rx_sound.o
 rk_hdmi_rx_sound-objs := sound/soc/rockchip/rockchip_hdmi.o
+
+obj-m += rk_multicodecs_fixed.o
+rk_multicodecs_fixed-objs := sound/soc/rockchip/rockchip_multicodecs.o

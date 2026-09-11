@@ -38,7 +38,7 @@
 #include <sound/soc.h>
 #include <sound/soc-dapm.h>
 
-#define DRV_NAME "rk-multicodecs"
+#define DRV_NAME "rk-multicodecs-fixed"
 #define WAIT_CARDS	(SNDRV_CARDS - 1)
 #define DEFAULT_MCLK_FS	256
 #define DAI_FMT_BASE	(SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_NB_NF)
@@ -427,7 +427,7 @@ static int rk_dailink_init(struct snd_soc_pcm_runtime *rtd)
 		{
 			.min_mv = 0,
 			.max_mv = 222,
-			.jack_type = SND_JACK_HEADPHONE,
+			.jack_type = SND_JACK_HEADSET,
 		}, {
 			.min_mv = 223,
 			.max_mv = 1500,
@@ -435,7 +435,7 @@ static int rk_dailink_init(struct snd_soc_pcm_runtime *rtd)
 		}, {
 			.min_mv = 1501,
 			.max_mv = UINT_MAX,
-			.jack_type = SND_JACK_HEADPHONE,
+			.jack_type = SND_JACK_HEADSET,
 		}
 	};
 
@@ -982,7 +982,7 @@ static void rk_multicodec_shutdown(struct platform_device *pdev)
 }
 
 static const struct of_device_id rockchip_multicodecs_of_match[] = {
-	{ .compatible = "rockchip,multicodecs-card", },
+	{ .compatible = "rockchip,multicodecs-card-fixed", },
 	{},
 };
 
