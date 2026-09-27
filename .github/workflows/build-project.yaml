@@ -88,11 +88,11 @@ jobs:
       - name: Upload Artifacts 📡
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: obs-studio-${{ matrix.os }}-${{ matrix.arch }}-${{ needs.check-event.outputs.commitHash }}
-          path: ${{ github.workspace }}/debian/artifacts/*_${{ matrix.deb_arch }}.*
+          name: rk-hdmirx-${{ matrix.os }}-${{ matrix.arch }}-${{ needs.check-event.outputs.commitHash }}
+          path: ${{ github.workspace }}/debian/artifacts/*
 
       - name: Upload Debug Symbol Artifacts 🪲
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: obs-studio-${{ matrix.os }}-${{ matrix.arch }}-${{ needs.check-event.outputs.commitHash }}-dbgsym
-          path: ${{ github.workspace }}/build_ubuntu/obs-studio-*-${{ matrix.deb_arch }}-ubuntu-gnu-dbgsym.ddeb
+          name: rk-hdmirx-${{ matrix.os }}-${{ matrix.arch }}-${{ needs.check-event.outputs.commitHash }}-dbgsym
+          path: ${{ github.workspace }}/build_ubuntu/*-ubuntu-gnu-dbgsym.ddeb
