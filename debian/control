@@ -1,0 +1,14 @@
+Source: rk-hdmirx
+Section: kernel
+Priority: optional
+Maintainer: obs <obs@rk-obs.ru>
+Rules-Requires-Root: no
+Build-Depends: debhelper-compat (= 13),
+Standards-Version: 4.7.2
+Homepage: https://github.com/mar0x/rk_hdmirx
+
+Package: rk-hdmirx
+Architecture: all
+Depends: ${misc:Depends},
+Description: Kernel modules for rk3588 changed to enable audio for HDMI RX
+ <Insert long description, indented with spaces.>

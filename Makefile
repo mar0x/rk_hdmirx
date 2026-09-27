@@ -12,3 +12,6 @@ rk_hdmi_rx_sound-objs := sound/soc/rockchip/rockchip_hdmi.o
 
 obj-m += rk_multicodecs_fixed.o
 rk_multicodecs_fixed-objs := sound/soc/rockchip/rockchip_multicodecs.o
+
+dummy:
+.PHONY: dummy
