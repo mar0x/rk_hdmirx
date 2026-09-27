@@ -1,0 +1,98 @@
+name: Build Project
+on:
+  workflow_call:
+jobs:
+  check-event:
+    name: Event Data 🔎
+    runs-on: ubuntu-26.04
+    defaults:
+      run:
+        shell: bash
+    outputs:
+      package: ${{ steps.setup.outputs.package }}
+      codesign: ${{ steps.setup.outputs.codesign }}
+      notarize: ${{ steps.setup.outputs.notarize }}
+      config: ${{ steps.setup.outputs.config }}
+      commitHash: ${{ steps.setup.outputs.commitHash }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+      - name: Check Event Data ☑️
+        id: setup
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          : Check Event Data ☑️
+          if [[ "${RUNNER_DEBUG}" ]]; then set -x; fi
+
+          case "${GITHUB_EVENT_NAME}" in
+            pull_request)
+              config_data=('codesign:false' 'notarize:false' 'package:false' 'config:RelWithDebInfo')
+              if gh pr view ${{ github.event.number }} --json labels \
+                | jq -e -r '.labels[] | select(.name == "Seeking Testers")' > /dev/null; then
+                config_data[0]='codesign:true'
+                config_data[2]='package:true'
+              fi
+              ;;
+            push)
+              config_data=('codesign:true' 'notarize:false' 'package:true' 'config:RelWithDebInfo')
+              if [[ ${GITHUB_REF_NAME} =~ [0-9]+.[0-9]+.[0-9]+(-(rc|beta).+)? ]]; then
+                config_data[1]='notarize:true'
+                config_data[3]='config:Release'
+              fi
+              ;;
+            workflow_dispatch)
+              config_data=('codesign:true' 'notarize:false' 'package:false' 'config:RelWithDebInfo')
+              ;;
+            schedule)
+              config_data=('codesign:true' 'notarize:false' 'package:true' 'config:RelWithDebInfo')
+              ;;
+            *) ;;
+          esac
+
+          for config in "${config_data[@]}"; do
+            IFS=':' read -r key value <<< "${config}"
+            echo "${key}=${value}" >> $GITHUB_OUTPUT
+          done
+          echo "commitHash=${GITHUB_SHA:0:9}" >> $GITHUB_OUTPUT
+
+  ubuntu-build:
+    name: Ubuntu 🐧
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-26.04]
+        arch: [arm64]
+        include:
+          - arch: arm64
+            runs_on: ubuntu-26.04-arm
+            deb_arch: arm64
+    runs-on: ${{ matrix.runs_on }}
+    needs: check-event
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Build and package 📀
+        uses: jtdor/build-deb-action@v1
+        with:
+          buildpackage-opts: --build=binary --no-sign
+          docker-image: ubuntu:26.04
+
+      - name: Upload Artifacts 📡
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: obs-studio-${{ matrix.os }}-${{ matrix.arch }}-${{ needs.check-event.outputs.commitHash }}
+          path: ${{ github.workspace }}/debian/artifacts/*_${{ matrix.deb_arch }}.*
+
+      - name: Upload Debug Symbol Artifacts 🪲
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: obs-studio-${{ matrix.os }}-${{ matrix.arch }}-${{ needs.check-event.outputs.commitHash }}-dbgsym
+          path: ${{ github.workspace }}/build_ubuntu/obs-studio-*-${{ matrix.deb_arch }}-ubuntu-gnu-dbgsym.ddeb
